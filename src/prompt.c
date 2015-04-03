@@ -100,6 +100,9 @@ char *prompt_str(const char *msg, ...)
 	position_cursor(bottwin, 0, answer.x_margin);
 
 	while (do_input_prompt());
+
+	clear_win(bottwin);
+	switch_win(MAINWIN);
 	
 	return answer.text;
 }

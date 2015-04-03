@@ -135,6 +135,7 @@ void handle_sigwinch(int signal)
 	clear_allwin();
 	display_buffer(curbuf->topln);
 	switch_win(curwin);
+	doupdate();
 }
 
 /*

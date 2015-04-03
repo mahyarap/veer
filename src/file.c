@@ -149,6 +149,18 @@ FILE *open_file(const char *path, const char *mode)
 				error = errno;
 				goto error_handling;
 			}
+			if (strcmp(mode, "w") == 0) {
+				switch (prompt_ync("`%s' already exists, overwrite?", path)) {
+				case YES:
+					break;
+				case NO:
+					return NULL;
+				case CANCEL:
+					return NULL;
+				default:
+					return NULL;
+				}
+			}
 			return fs;
 		}
 	}
