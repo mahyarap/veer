@@ -23,6 +23,7 @@
 #include <termios.h>
 #include <string.h>
 #include <signal.h>
+#include <setjmp.h>
 
 #include "proto.h"
 
@@ -88,17 +89,52 @@ void init_terminal()
 void init_window()
 {
 	/* newwin(int nlines, int ncols, int begin_y, int begin_x); */
-	mainwin = newwin(LINES - BOTTWIN_HEIGHT, COLS, 0, 0);
-	statbar = newwin(1, COLS, LINES - BOTTWIN_HEIGHT - 1, 0);
+	mainwin = newwin(LINES - BOTTWIN_HEIGHT - STATBAR_HEIGHT, COLS, 0, 0);
+	statbar = newwin(STATBAR_HEIGHT, COLS, LINES - BOTTWIN_HEIGHT - STATBAR_HEIGHT, 0);
 	bottwin = newwin(BOTTWIN_HEIGHT, COLS, LINES - BOTTWIN_HEIGHT, 0); 
-
+	
 	keypad(mainwin, TRUE);
 	keypad(bottwin, TRUE);
 }
 
-void do_suspend(int signal)
+void handle_sigstp(int signal)
 {
 
+}
+
+/*
+ * Handle SIGWINCH i.e. window change signal.
+ */
+void handle_sigwinch(int signal)
+{
+	WINDOW *mw, *sw, *bw;
+
+	mw = mainwin;
+	sw = statbar;
+	bw = bottwin;
+	/*
+	 * A program should always call endwin before exiting or escaping from
+	 * curses mode temporarily. This routine restores tty modes, moves 
+	 * the cursor to the lower left-hand corner of the screen and resets
+	 * the terminal into the proper non-visual mode. Calling refresh or doupdate
+	 * after a temporary escape causes the program to resume visual mode.
+	 */
+	endwin();
+	doupdate();
+
+	init_terminal();
+	init_window();
+
+	if (mw != mainwin)
+		delwin(mw);
+	if (sw != statbar)
+		delwin(sw);
+	if (bw != bottwin)
+		delwin(bw);
+
+	clear_allwin();
+	display_buffer(curbuf->topln);
+	switch_win(curwin);
 }
 
 /*
@@ -109,9 +145,13 @@ void init_signal()
 	struct sigaction act;
 
 	memset(&act, 0, sizeof(struct sigaction));
-	act.sa_handler = do_suspend;
+	act.sa_handler = handle_sigstp;
 	/* SIGTSTP: Stop typed at terminal (^Z) */
 	sigaction(SIGTSTP, &act, NULL);
+
+	sigfillset(&act.sa_mask);
+	act.sa_handler = handle_sigwinch;
+	sigaction(SIGWINCH, &act, NULL);
 }
 
 /*
@@ -123,7 +163,8 @@ void do_exit()
 
 	for (it = firstbuf; it != NULL; it = it->next) {
 		if (it->modified) {
-			switch (prompt_ync("Save modified buffer `%s`?", it->path)) {
+			switch (prompt_ync("Save modified buffer `%s`?", 
+						it->path != NULL ? it->path : "Untitled")) {
 			case YES:
 				save_buffer();
 				if (it->modified) {
@@ -149,6 +190,7 @@ void do_exit()
  */
 void finish()
 {
+	delwin(bottwin);
 	delwin(statbar);
 	delwin(mainwin);
 	endwin();
@@ -244,6 +286,7 @@ int main(int argc, char *argv[])
 	
 	init_terminal();
 	init_window();	
+	init_signal();
 
 	/* End of initializations */
 
@@ -264,6 +307,7 @@ int main(int argc, char *argv[])
 		display_buffer();
 	}
 	reset_cursor();
+	curwin = MAINWIN;
 
 	/* The main loop of the program */
 	while (TRUE) {

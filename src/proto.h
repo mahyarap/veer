@@ -11,6 +11,7 @@
 extern WINDOW *mainwin;
 extern WINDOW *statbar;
 extern WINDOW *bottwin;
+extern Curwin curwin;
 
 extern Buffer *firstbuf;
 extern Buffer *lastbuf;
@@ -69,6 +70,8 @@ void position_cursor(WINDOW *win, int y, int x);
 void reset_cursor();
 void display_buffer();
 void clear_win(WINDOW *win);
+void clear_allwin();
+void switch_win(Curwin cur);
 
 /* text.c */
 void do_enter();

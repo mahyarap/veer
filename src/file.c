@@ -346,19 +346,6 @@ void buffer_modified(bool modified)
 }
 
 /*
- * bool is_valid_path(const char *path)
- * {
- *     struct stat filestat;
- * 
- *     if (stat(path, &filestat) == 0) {
- *         return TRUE;
- *     }
- *     [> else <]
- *     return FALSE;
- * }
- */
-
-/*
  * Save buffer to disk.
  */
 void save_buffer()

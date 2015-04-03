@@ -14,6 +14,11 @@
 /* VEER version */
 #define VERSION "0.0.1"
 
+typedef enum Curwin {
+	MAINWIN,
+	BOTTWIN
+} Curwin;
+
 typedef enum Direction {
 	UP = -1, 
 	DOWN = 1

@@ -185,7 +185,7 @@ void update_statbar()
 	wattroff(statbar, A_REVERSE);
 
 	wnoutrefresh(statbar);
-	wnoutrefresh(mainwin);
+	switch_win(MAINWIN);
 }
 
 void do_prev_buf()
@@ -202,5 +202,20 @@ void do_next_buf()
 		curbuf = curbuf->next;
 		display_buffer();
 	}
+}
+
+void clear_allwin()
+{
+	clear_win(mainwin);
+	clear_win(statbar);
+	clear_win(bottwin);
+}
+
+void switch_win(Curwin cur)
+{
+	if (cur == MAINWIN)
+		wnoutrefresh(mainwin);
+	else if (cur == BOTTWIN)
+		wnoutrefresh(bottwin);
 }
 

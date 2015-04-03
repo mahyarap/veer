@@ -38,6 +38,8 @@ Response prompt_ync(const char *question, ...)
 	va_list ap;
 	char buffer[256];
 
+	curwin = BOTTWIN;
+
 	va_start (ap, question);
 	vsnprintf (buffer, 256, question, ap);
 	va_end (ap);
@@ -60,13 +62,18 @@ Response prompt_ync(const char *question, ...)
 		case 'C':
 			res = CANCEL;
 			break;
+		case ERR:
+			mvprint_msg_prompt(buffer, 0);
+			mvprint_msg_prompt("[Y]es, [N]o, [C]ancel: ", 1);
 		default:
 			res = ILLEGAL;
 		}
 	} while (res == ILLEGAL);
 
 	clear_win(bottwin);
-	wnoutrefresh(mainwin);
+	switch_win(MAINWIN);
+
+	curwin = MAINWIN;
 	
 	return res;
 }
@@ -113,7 +120,7 @@ void print_msg_prompt(const char *msg, ...)
 	va_end (ap);
 
 	wnoutrefresh(bottwin);
-	wnoutrefresh(mainwin);
+	switch_win(MAINWIN);
 }
 
 static void mvprint_msg_prompt(const char *msg, int y)
@@ -190,7 +197,7 @@ static void do_escape()
 	clear_win(bottwin);
 	free(answer.text);
 	answer.text = NULL;
-	wnoutrefresh(mainwin);
+	switch_win(MAINWIN);
 }
 
 static bool do_input_prompt()

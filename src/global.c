@@ -7,6 +7,7 @@
 WINDOW *mainwin = NULL;
 WINDOW *statbar = NULL;
 WINDOW *bottwin = NULL;
+Curwin curwin;
 
 Buffer *curbuf = NULL;
 Buffer *firstbuf = NULL;
