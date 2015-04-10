@@ -37,6 +37,7 @@ typedef enum Response {
 typedef struct Line {
 	char *text;
 	size_t len;
+	size_t memsize;
 	size_t line_no;
 	struct Line *prev;
 	struct Line *next;
@@ -59,7 +60,7 @@ typedef struct Buffer {
 } Buffer; /* Buffer is only an alias not an instance */
 
 /* Macros */
-#define BUFFER_SIZE 	128
+#define BUFFER_SIZE 	80
 #define STATBAR_HEIGHT 	1
 #define BOTTWIN_HEIGHT 	2
 #define MAINWIN_OFFSET 	(STATBAR_HEIGHT + BOTTWIN_HEIGHT)

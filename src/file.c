@@ -19,7 +19,7 @@ void open_buffer(const char *path)
 	/* No path was given. Just create a blank buffer.*/
 	if (path == NULL) {
 		push_back_buffer(NULL);
-		push_back_line("", 0);
+		push_back_line(NULL);
 	} 
 	/* A path was given */
 	else {
@@ -33,9 +33,8 @@ void open_buffer(const char *path)
 		 * Later when saving the buffer, we check if path is valid or not.
 		 */
 		else {
-			/* new_buffer(path); */
 			push_back_buffer(path);
-			push_back_line("", 0);
+			push_back_line(NULL);
 		}
 	}
 	curbuf = firstbuf;
@@ -198,12 +197,14 @@ void read_into_buffer(FILE *fs)
 	int ch;
 	int i = 0;
 	char *buf;
+	Line *line;
 	size_t buffer_mem = BUFFER_SIZE;
 
 	assert(fs != NULL);
 
 	buf = charalloc(BUFFER_SIZE);
 	buf[0] = '\0';
+	line = new_line();
 
 	/* Read the whole file into the buffer */
 	while ((ch = fgetc(fs)) != EOF) {
@@ -219,7 +220,11 @@ void read_into_buffer(FILE *fs)
 
 		/* A new line */
 		if ((char)ch == '\n') {
-			push_back_line(buf, i);
+			line->text = buf;
+			line->len = i;
+			line->memsize = buffer_mem;
+			push_back_line(line);
+
 			memset(buf, 0, i + 1);
 			buffer_mem = BUFFER_SIZE;
 			i = 0;
@@ -231,14 +236,13 @@ void read_into_buffer(FILE *fs)
 	 * the lastln line of the file.
 	 */
 	if (curbuf->firstln == NULL || buf[0] != '\0') {
-		push_back_line(buf, i);
+		push_back_line(line);
 	}
-	
-	free(buf);
+	delete_line(line);
 }
 
 /*
- * Initialize line (should only be called from within push_back_line()).
+ * Initialize line.
  */
 Line *new_line()
 {
@@ -248,6 +252,7 @@ Line *new_line()
 
 	line->text = NULL;
 	line->len = 0;
+	line->memsize = 0;
 	line->line_no = 0;
 	line->next = NULL;
 	line->prev = NULL;
@@ -265,16 +270,20 @@ void delete_line(Line *line)
  * Make a new line with text of len characters. Push the new line at 
  * the back of the linked list.
  */
-void push_back_line(const char *text, size_t len)
+void push_back_line(const Line *line)
 {
 	Line *nline;
 
-	assert(text != NULL);
-
 	nline = new_line();
-	nline->text = charalloc(len + 1);
-	strcpy(nline->text, text);
-	nline->len = len;
+	if (line != NULL) {
+		nline->text = charalloc(line->memsize);
+		strcpy(nline->text, line->text);
+		nline->len = line->len;
+		nline->memsize = line->memsize;
+	} else {
+		nline->text = charalloc(BUFFER_SIZE);
+		nline->memsize = BUFFER_SIZE;
+	}
 
 	/* If not the first line, link the last line to the new line */
 	if (curbuf->lastln != NULL) {
@@ -304,18 +313,19 @@ void push_back_line(const char *text, size_t len)
  * pointed by ptr. If ptr points to the last line, call push_back_line() instead.
  * We do not advance curbuf->curln to point to the new line.
  */
-void insert_line(Line *ptr, const char *text, size_t len)
+void insert_line(Line *ptr, const Line *line)
 {
 	Line *nline;
 
 	if (ptr == curbuf->lastln) {
-		push_back_line(text, len);
+		push_back_line(line);
 	}
 	else {
 		nline = new_line();
-		nline->text = charalloc(len + 1);
-		strcpy(nline->text, text);
-		nline->len = len;
+		nline->text = charalloc(line->memsize);
+		strcpy(nline->text, line->text);
+		nline->len = line->len;
+		nline->memsize = line->memsize;
 
 		nline->prev = ptr;
 		nline->next = ptr->next;
@@ -343,7 +353,6 @@ void erase_line(Line *ptr)
 		curbuf->lastln = ptr->prev;
 		ptr->prev->next = NULL;
 	}
-
 	free(ptr->text);
 	free(ptr);
 }
