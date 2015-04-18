@@ -16,7 +16,7 @@ int get_input(WINDOW *win, bool *short_cut, bool *action_key)
 	doupdate();
 
 	/* Using blocking mode */
-	input = wgetch(mainwin);
+	input = wgetch(win);
 
 	/* Printable character */
 	/*

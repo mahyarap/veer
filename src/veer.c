@@ -88,6 +88,13 @@ void init_terminal()
  */
 void init_window()
 {
+	if (mainwin != NULL)
+		delwin(mainwin);
+	if (statbar != NULL)
+		delwin(statbar);
+	if (bottwin != NULL)
+		delwin(bottwin);
+
 	/* newwin(int nlines, int ncols, int begin_y, int begin_x); */
 	mainwin = newwin(LINES - BOTTWIN_HEIGHT - STATBAR_HEIGHT, COLS, 0, 0);
 	statbar = newwin(STATBAR_HEIGHT, COLS, LINES - BOTTWIN_HEIGHT - STATBAR_HEIGHT, 0);
@@ -107,11 +114,6 @@ void handle_sigstp(int signal)
  */
 void handle_sigwinch(int signal)
 {
-	WINDOW *mw, *sw, *bw;
-
-	mw = mainwin;
-	sw = statbar;
-	bw = bottwin;
 	/*
 	 * A program should always call endwin before exiting or escaping from
 	 * curses mode temporarily. This routine restores tty modes, moves 
@@ -124,13 +126,6 @@ void handle_sigwinch(int signal)
 
 	init_terminal();
 	init_window();
-
-	if (mw != mainwin)
-		delwin(mw);
-	if (sw != statbar)
-		delwin(sw);
-	if (bw != bottwin)
-		delwin(bw);
 
 	clear_allwin();
 	display_buffer(curbuf->topln);
