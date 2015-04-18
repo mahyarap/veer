@@ -24,7 +24,7 @@ static void go_right_prompt();
 static void go_left_prompt();
 static void do_backspace_prompt();
 static void do_escape();
-static bool do_input_prompt();
+static int do_input_prompt();
 
 /*
  * Prompt user with a Yes/No/Cancel question
@@ -71,10 +71,9 @@ Response prompt_ync(const char *question, ...)
 	} while (res == ILLEGAL);
 
 	clear_win(bottwin);
-	switch_win(MAINWIN);
-
 	curwin = MAINWIN;
-	
+	switch_win(curwin);
+
 	return res;
 }
 
@@ -86,6 +85,7 @@ char *prompt_str(const char *msg, ...)
 {
 	va_list ap;
 	char buffer[256];
+	int retval;
 
 	va_start (ap, msg);
 	vsnprintf (buffer, 256, msg, ap);
@@ -99,11 +99,17 @@ char *prompt_str(const char *msg, ...)
 	mvprint_msg_prompt("(Press ESCAPE to cancel)", 1);
 	position_cursor(bottwin, 0, answer.x_margin);
 
-	while (do_input_prompt());
+	while ((retval = do_input_prompt()) != FALSE) {
+		if (retval == ERR) {
+			mvprint_msg_prompt(buffer, 0);
+			mvprint_msg_prompt("(Press ESCAPE to cancel)", 1);
+			print_answer_prompt(answer.text);
+		}
+	}
 
 	clear_win(bottwin);
 	switch_win(MAINWIN);
-	
+
 	return answer.text;
 }
 
@@ -203,10 +209,10 @@ static void do_escape()
 	switch_win(MAINWIN);
 }
 
-static bool do_input_prompt()
+static int do_input_prompt()
 {
 	int input;
-	bool cont = TRUE;
+	int retval = TRUE;
 	bool short_cut, action_key;
 
 	input = get_input(bottwin, &short_cut, &action_key);
@@ -229,20 +235,23 @@ static bool do_input_prompt()
 			go_end();
 			break;
 		case CARRIAGE_RET:
-			cont = FALSE;
+			retval = FALSE;
 			break;
 		case ESCAPE:
 			do_escape();
-			cont = FALSE;
+			retval = FALSE;
 			break;
 		case KEY_BACKSPACE:
 			do_backspace_prompt();
+			break;
+		case ERR:
+			retval = ERR;
 			break;
 		default:
 			break;
 		}
 	}
-	return cont;
+	return retval;
 }
 
 static void answer_init()
