@@ -130,7 +130,7 @@ void handle_sigwinch(int signal)
 	clear_allwin();
 	display_buffer(curbuf->topln);
 	switch_win(curwin);
-	doupdate();
+	ungetch(KEY_RESIZE);
 }
 
 /*
@@ -145,6 +145,7 @@ void init_signal()
 	/* SIGTSTP: Stop typed at terminal (^Z) */
 	sigaction(SIGTSTP, &act, NULL);
 
+	/* Block all signals during execution of signal handler */
 	sigfillset(&act.sa_mask);
 	act.sa_handler = handle_sigwinch;
 	sigaction(SIGWINCH, &act, NULL);

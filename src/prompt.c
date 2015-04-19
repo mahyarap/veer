@@ -32,9 +32,9 @@ static int do_input_prompt();
  */
 Response prompt_ync(const char *question, ...)
 {
-	char input;
+	int input;
 	bool sc, ak;
-	Response res = ILLEGAL;
+	Response resp = ILLEGAL;
 	va_list ap;
 	char buffer[256];
 
@@ -49,32 +49,32 @@ Response prompt_ync(const char *question, ...)
 	mvprint_msg_prompt("[Y]es, [N]o, [C]ancel: ", 1);
 
 	do {
-		switch (input = (char)get_input(bottwin, &sc, &ak)) {
+		switch (input = get_input(bottwin, &sc, &ak)) {
 		case 'y':
 		case 'Y':
-			res = YES;
+			resp = YES;
 			break;
 		case 'n':
 		case 'N':
-			res = NO;
+			resp = NO;
 			break;
 		case 'c':
 		case 'C':
-			res = CANCEL;
+			resp = CANCEL;
 			break;
-		case ERR:
+		case KEY_RESIZE:
 			mvprint_msg_prompt(buffer, 0);
 			mvprint_msg_prompt("[Y]es, [N]o, [C]ancel: ", 1);
 		default:
-			res = ILLEGAL;
+			resp = ILLEGAL;
 		}
-	} while (res == ILLEGAL);
+	} while (resp == ILLEGAL);
 
 	clear_win(bottwin);
 	curwin = MAINWIN;
 	switch_win(curwin);
 
-	return res;
+	return resp;
 }
 
 /*
@@ -100,7 +100,7 @@ char *prompt_str(const char *msg, ...)
 	position_cursor(bottwin, 0, answer.x_margin);
 
 	while ((retval = do_input_prompt()) != FALSE) {
-		if (retval == ERR) {
+		if (retval == KEY_RESIZE) {
 			mvprint_msg_prompt(buffer, 0);
 			mvprint_msg_prompt("(Press ESCAPE to cancel)", 1);
 			print_answer_prompt(answer.text);
@@ -246,6 +246,9 @@ static int do_input_prompt()
 			break;
 		case ERR:
 			retval = ERR;
+			break;
+		case KEY_RESIZE:
+			retval = KEY_RESIZE;
 			break;
 		default:
 			break;
