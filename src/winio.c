@@ -1,6 +1,8 @@
 /*
  * This module contains functions for window I/O
  */
+#include <ctype.h>
+
 #include "proto.h"
 
 /*
@@ -23,12 +25,12 @@ int get_input(WINDOW *win, bool *short_cut, bool *action_key)
 	 * Exception:
 	 * Horizontal tab = 9
 	 */
-	if ((32 <= input && input <= 126) || input == 9) {
+	if (isprint(input) || input == 9) {
 		*short_cut = FALSE;
 		*action_key = FALSE;
 	}
 	/* Short cut (CTRL+char) */
-	else if ((0 <= input && input <= 31) && input != 13 && input != 27) {
+	else if (iscntrl(input) && input != 13 && input != 27) {
 		*short_cut = TRUE;
 		*action_key = FALSE;
 	}
