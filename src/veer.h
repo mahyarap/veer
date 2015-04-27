@@ -8,7 +8,6 @@
 /* header files that are only used throughout the program */
 #include <stdlib.h>
 #include <assert.h>
-#include <errno.h>
 #include <curses.h>
 
 /* VEER version */

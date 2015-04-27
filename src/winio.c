@@ -1,9 +1,9 @@
 /*
  * This module contains functions for window I/O
  */
+#include "proto.h"
 #include <ctype.h>
 
-#include "proto.h"
 
 /*
  * Get input from user and determine if the input is a short cut (CTRL+char),

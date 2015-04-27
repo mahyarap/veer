@@ -19,13 +19,11 @@
  *                                                                        *
  **************************************************************************/
 
+#include "proto.h"
 #include <unistd.h>
 #include <termios.h>
 #include <string.h>
 #include <signal.h>
-#include <setjmp.h>
-
-#include "proto.h"
 
 /*
  * Print the usage of the program and exit.

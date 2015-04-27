@@ -1,7 +1,7 @@
 
+#include "proto.h"
 #include <string.h>
 
-#include "proto.h"
 
 /*
  * Insert the character c into the curln line where the cursor is located.

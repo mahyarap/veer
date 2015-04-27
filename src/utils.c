@@ -1,9 +1,10 @@
 /*
  * This module includes auxiliary functions to perform various tasks
  */
+#include "proto.h"
+#include <errno.h>
 #include <string.h>
 
-#include "proto.h"
 
 /*
  * Convert visual x-coordinate to the index of its correspondent

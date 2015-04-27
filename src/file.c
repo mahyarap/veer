@@ -2,12 +2,12 @@
  * This module contains functions for file and buffer manipulation
  */
 
+#include "proto.h"
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <errno.h>
 #include <string.h>
-
-#include "proto.h"
 
 /*
  * Open a new buffer according to path.

@@ -1,7 +1,7 @@
 
+#include "proto.h"
 #include <string.h>
 #include <stdarg.h>
-#include "proto.h"
 
 /*
  * A structure definition is private to a source file unless placed 
