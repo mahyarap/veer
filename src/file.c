@@ -275,7 +275,7 @@ void push_back_line(const Line *line)
 	Line *nline;
 
 	nline = new_line();
-	if (line != NULL) {
+	if (line != NULL && line->text != NULL) {
 		nline->text = charalloc(line->memsize);
 		strcpy(nline->text, line->text);
 		nline->len = line->len;
