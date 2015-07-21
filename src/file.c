@@ -236,6 +236,9 @@ void read_into_buffer(FILE *fs)
 	 * the lastln line of the file.
 	 */
 	if (curbuf->firstln == NULL || buf[0] != '\0') {
+		line->text = buf;
+		line->len = i;
+		line->memsize = buffer_mem;
 		push_back_line(line);
 	}
 	delete_line(line);
